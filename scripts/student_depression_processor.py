@@ -1,6 +1,6 @@
 import pandas as pd
 
-df = pd.read_csv("student_depression_dataset.csv")
+df = pd.read_csv("../raw/student_depression_dataset.csv")
 
 df["Profession"] = df["Profession"].apply(
     lambda x: "Unemployed" if x == "Student" else "Employed"
@@ -60,4 +60,4 @@ other_cols = [col for col in df.columns if col not in first_cols]
 new_order = first_cols + other_cols
 df = df[new_order]
 
-df.to_csv('processed_student_depression_dataset.csv',index=False)
+df.to_csv("../staging/processed_student_depression_dataset.csv",index=False)
