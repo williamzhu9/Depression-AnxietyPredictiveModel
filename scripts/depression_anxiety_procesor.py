@@ -13,22 +13,20 @@ OUTPUT_PATH.parent.mkdir(parents=True, exist_ok=True)
 def standardize_demographics(df: pd.DataFrame) -> pd.DataFrame:
 
     if "school_year" in df.columns:
-        df["education_level"] = "bachelors degree"   # your requirement
-    
+        df["education_level"] = "bachelors degree"
+        df["employment_status"] = "unemployed"
+    else:
+        df["education_level"] = None
+        df["employment_status"] = None
 
-    df["employment_status_standard"] = "unemployed"
-
-
-    df = df.drop(columns=["school_year", "education_current"], errors="ignore")
+    df = df.drop(columns=["school_year"], errors="ignore")
 
     return df
-
-
 
 def standardize_sleep(df: pd.DataFrame) -> pd.DataFrame:
     """
     Sleep quality must be derived directly from Epworth, with a 4-category scale.
-    Categories aligned to Copper's clinical interpretation but mapped into the
+    Categories aligned to clinical interpretation but mapped into the
     user's 4 discrete bins:
         - <5  → poor
         - 5-6 → fair
@@ -45,27 +43,19 @@ def standardize_sleep(df: pd.DataFrame) -> pd.DataFrame:
         except (TypeError, ValueError):
             epw = None
 
- 
+        # Ranges taken from official EPW score classification, scores above 10 indicate problems with sleep habits, scores below 10 are normal
         if epw is not None:
-            if epw <= 3:
+            if epw <= 5:
                 return "excellent"      
-            elif 4 <= epw <= 6:
+            elif 6 <= epw <= 10:
                 return "good"           
-            elif 7 <= epw <= 8:
-                return "fair"           
-            elif epw >= 9:
+            elif 11 <= epw <= 15:
+                return "bad"           
+            elif epw > 15:
                 return "poor"           
-
-
-        sleepy_str = str(sleepy).strip().lower()
-        if sleepy_str == "true":
-            return "fair"
-        elif sleepy_str == "false":
-            return "good"
-
         return "unknown"
 
-    df["sleep_quality_cat"] = df.apply(classify_sleep, axis=1)
+    df["sleep_quality"] = df.apply(classify_sleep, axis=1)
     return df
 
 def standardize_bmi(df: pd.DataFrame) -> pd.DataFrame:
@@ -80,7 +70,12 @@ def standardize_bmi(df: pd.DataFrame) -> pd.DataFrame:
             "Not Availble": None,
             "Not Available": None,
         }
-        df["physical_health_score"] = df["who_bmi"].map(health_score_map)
+        num_as_health = {
+            1: "unhealthy",
+            2: "moderate",
+            3: "healthy"
+        }
+        df["health_risks"] = df["who_bmi"].map(health_score_map).map(num_as_health)
     return df
 
 
@@ -135,7 +130,6 @@ def standardize_anxiety(df: pd.DataFrame) -> pd.DataFrame:
 
     return df
 
-
 def main():
     df_raw = pd.read_csv(INPUT_PATH)
     df = df_raw.copy()
@@ -164,10 +158,14 @@ def main():
         "epworth_score",
     ]
     df = df.drop(columns=cols_to_drop, errors="ignore")
+    df.dropna(inplace=True)
+    first_cols = ["gender", "age", "education_level", "employment_status", "sleep_quality", "health_risks"]
+    other_cols = [col for col in df.columns if col not in first_cols]
+    new_order = first_cols + other_cols
+    df = df[new_order]
 
     df.to_csv(OUTPUT_PATH, index=False)
     print(f"Saved standardized file to: {OUTPUT_PATH.resolve()}")
-
 
 if __name__ == "__main__":
     main()
