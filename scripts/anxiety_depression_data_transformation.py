@@ -1,7 +1,7 @@
 import pandas as pd
 
 #importing file 
-csv_path = "anxiety_depression_data.csv"
+csv_path = "../raw/anxiety_depression_data.csv"
 df = pd.read_csv(csv_path)
 
 def transform_medication_use(medication_use):
@@ -22,15 +22,15 @@ def transform_substance_use(substance_use):
 
 def transform_education(education):
     if education == "High School":
-        return 0
-    elif education == "Bachelor's":
         return 1
-    elif education == "Master's":
+    elif education == "Bachelor's":
         return 2
-    elif education == "PhD":
+    elif education == "Master's":
         return 3
-    elif education == "Other":
+    elif education == "PhD":
         return 4
+    elif education == "Other":
+        return 0
     else:
         return "FAILED"
 
@@ -111,4 +111,4 @@ df["Phys_Health"] = df.apply(
 df = pd.get_dummies(df, columns=['Employment_Status', 'Gender'])
 df = df.astype(int)
 
-df.to_csv("processed_anxiety_depression_data.csv", index=False)
+df.to_csv("../staging/processed_anxiety_depression_data.csv", index=False)
