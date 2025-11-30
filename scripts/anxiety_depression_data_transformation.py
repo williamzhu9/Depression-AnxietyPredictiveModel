@@ -22,15 +22,15 @@ def transform_substance_use(substance_use):
 
 def transform_education(education):
     if education == "High School":
-        return 0
-    elif education == "Bachelor's":
         return 1
-    elif education == "Master's":
+    elif education == "Bachelor's":
         return 2
-    elif education == "PhD":
+    elif education == "Master's":
         return 3
-    elif education == "Other":
+    elif education == "PhD":
         return 4
+    elif education == "Other":
+        return 0
     else:
         return "FAILED"
 
