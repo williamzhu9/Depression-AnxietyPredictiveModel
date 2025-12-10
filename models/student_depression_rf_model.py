@@ -3,46 +3,64 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import classification_report, accuracy_score, confusion_matrix, ConfusionMatrixDisplay
-
-# Load CSV
-df = pd.read_csv("../pre_processed/processed_student_depression_dataset.csv")
-
-# Separate features/labels
-X = df.drop("depression", axis=1)
-y = df["depression"]
-
-# Train-test split
-X_train, X_test, y_train, y_test = train_test_split(
-    X, y, test_size=0.2, random_state=42, stratify=y
+from sklearn.metrics import (
+    classification_report,
+    accuracy_score,
+    confusion_matrix,
+    ConfusionMatrixDisplay
 )
 
-# Random Forest model
-model = RandomForestClassifier(
-    n_estimators=300, 
-    random_state=42, 
-    class_weight="balanced")
+def train_model(data_path="../pre_processed/processed_student_depression.csv"):
+    # Load data
+    df = pd.read_csv(data_path)
+    X = df.drop("depression", axis=1)
+    y = df["depression"]
 
+    # Train-test split
+    X_train, X_test, y_train, y_test = train_test_split(
+        X, y, test_size=0.2, random_state=42, stratify=y
+    )
 
-print("Training model...")
-model.fit(X_train, y_train)
+    # Random Forest model
+    model = RandomForestClassifier(
+        n_estimators=300,
+        random_state=42,
+        class_weight="balanced"
+    )
 
-print("Evaluating model...")
-y_pred = model.predict(X_test)
+    print("Training Random Forest model...")
+    model.fit(X_train, y_train)
 
-print("Accuracy:", accuracy_score(y_test, y_pred))
-print("\nClassification Report:\n", classification_report(y_test, y_pred))
+    return model, X_test, y_test
 
-# Confusion matrix 
-cm = confusion_matrix(y_test, y_pred)
-disp = ConfusionMatrixDisplay(confusion_matrix=cm)
-disp.plot(cmap="Blues")
-plt.title("Confusion Matrix")
-plt.show()
+def evaluate_model(model, X_test, y_test):
+    y_pred = model.predict(X_test)
 
-# Correlation Matrix
-plt.figure(figsize=(12, 10))
-corr = X.corr()  # Correlation of features only
-sns.heatmap(corr, cmap="viridis", annot=False)
-plt.title("Feature Correlation Matrix")
-plt.show()
+    print("Accuracy:", accuracy_score(y_test, y_pred))
+    print("\nClassification Report:\n", classification_report(y_test, y_pred))
+
+    # Confusion matrix
+    cm = confusion_matrix(y_test, y_pred)
+    disp = ConfusionMatrixDisplay(confusion_matrix=cm)
+    disp.plot(cmap="Blues")
+    plt.title("Confusion Matrix")
+    plt.show()
+
+    return y_pred
+
+def plot_feature_correlation(X):
+    plt.figure(figsize=(12, 10))
+    corr = X.corr()
+    sns.heatmap(corr, cmap="viridis", annot=False)
+    plt.title("Feature Correlation Matrix")
+    plt.show()
+
+def main():
+    model, X_test, y_test = train_model()
+
+    y_pred = evaluate_model(model, X_test, y_test)
+
+    plot_feature_correlation(X_test)
+
+if __name__ == "__main__":
+    main()

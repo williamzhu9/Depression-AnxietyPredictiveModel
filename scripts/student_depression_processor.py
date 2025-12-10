@@ -34,7 +34,7 @@ def profession_simplification(x):
             return "student"
         
         # Unemployed group
-        if "unemployed" in x_lower or "none" or "other" in x_lower:
+        if "unemployed" in x_lower or "none" in x_lower or "other" in x_lower:
             return "unemployed"
         
         return "employed"
@@ -66,14 +66,12 @@ degree_multiclass ={
     "phd": 3,
 }
 
-
 # Drop all missing data rows
 df.dropna(inplace=True)
 # Treating 'other' as missing data to reduce noise for sleep duration
 df = df[~df['Sleep Duration'].isin(['Others'])]
 # Dropping id and city to reduce noise and prevent overfitting (we don't care about id and we don't want city to influence classification due to lack of city data)
 df.drop(['id', "City"], axis=1,inplace=True)
-
 
 # Map all columns to proper encoding
 df["Dietary Habits"] = df["Dietary Habits"].map(health_multiclass)
@@ -84,11 +82,9 @@ df["Degree"] = df["Degree"].apply(degree_map).map(degree_multiclass)
 df["Gender"] = df["Gender"].map(gender_map)
 df["Profession"] = df["Profession"].apply(profession_simplification).map(profession_map)
 
-
 # Rename degree to education level
 df.rename(columns={"Profession": "Employment", "Degree": "Education Level"},inplace=True)
 df.columns = df.columns.str.lower()
-
 
 # Reorder columns so that T/F are together and Numerics are together
 last_cols = ["employment", "have you ever had suicidal thoughts ?", "family history of mental illness", "depression"]
