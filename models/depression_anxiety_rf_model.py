@@ -3,8 +3,6 @@ import numpy as np
 import pandas as pd
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import (
-    roc_auc_score,
-    log_loss,
     accuracy_score,
     precision_recall_curve,
     confusion_matrix,
@@ -17,11 +15,9 @@ TARGET_COL = "depression_diagnosis"
 TRAIN_PATH = PROJECT_ROOT/"pre_processed"/"depression_anxiety_train.csv"
 TEST_PATH = PROJECT_ROOT/"pre_processed"/"depression_anxiety_test.csv"
 
-def load_XY(
-    train_path: str = TRAIN_PATH,
-    test_path: str = TEST_PATH,
-    target_col: str = TARGET_COL,
-):
+
+# Load the training & testing data
+def load_XY(train_path: str = TRAIN_PATH, test_path: str = TEST_PATH, target_col: str = TARGET_COL):
     df_train = pd.read_csv(train_path)
     df_test = pd.read_csv(test_path)
 
@@ -51,17 +47,11 @@ def baseline_logloss_from_rate(p: float) -> float:
     return -(p * np.log(p + eps) + (1 - p) * np.log(1 - p + eps))
 
 
-def main():
-    X_train, X_valid, X_test, y_train, y_valid, y_test = load_XY()
-
-    print("Shapes:")
-    print(f"  X_train: {X_train.shape}, y_train: {y_train.shape}")
-    print(f"  X_valid: {X_valid.shape}, y_valid: {y_valid.shape}")
-    print(f"  X_test : {X_test.shape},  y_test : {y_test.shape}")
-
+# Actually train the model
+def train_model(X_train, y_train):
     pos = float(y_train.sum())
     neg = float(len(y_train) - y_train.sum())
-    class_weight = {0: 1, 1: neg/pos} if pos > 0 else "balanced"
+    class_weight = {0: 1, 1: neg / pos} if pos > 0 else "balanced"
     print(f"\nClass weight for positive class: {class_weight}")
 
     model = RandomForestClassifier(
@@ -75,50 +65,60 @@ def main():
 
     print("\nTraining Random Forest model...")
     model.fit(X_train, y_train)
+    return model
 
-    y_pred_valid_prob = model.predict_proba(X_valid)[:, 1]
-    y_pred_valid_bin = (y_pred_valid_prob >= 0.5).astype(int)
+# Model accuracy
+def evaluate_model(model, X, y, threshold=0.5):
+    y_prob = model.predict_proba(X)[:, 1]
+    y_pred = (y_prob >= threshold).astype(int)
 
-    val_auc = roc_auc_score(y_valid, y_pred_valid_prob)
-    val_logloss = log_loss(y_valid, y_pred_valid_prob)
-    val_acc = accuracy_score(y_valid, y_pred_valid_bin)
+    acc = accuracy_score(y, y_pred)
+    print(f"Accuracy@{threshold}: {acc:.4f}")
+    return y_pred, y_prob
 
-    print("\nValidation Results:")
-    print(f"  LogLoss:    {val_logloss:.4f}")
-    print(f"  AUC:        {val_auc:.4f}")
-    print(f"  Accuracy@0.5: {val_acc:.4f}")
 
-    p_valid = float(y_valid.mean())
-    base_ll = baseline_logloss_from_rate(p_valid)
-    print(f"\nValid positive rate: {p_valid:.4f}")
-    print(f"Baseline logloss (predict mean): {base_ll:.4f}")
-
-    y_pred_test_prob = model.predict_proba(X_test)[:, 1]
-    y_pred_test_bin = (y_pred_test_prob >= 0.5).astype(int)
-
-    test_auc = roc_auc_score(y_test, y_pred_test_prob)
-    test_logloss = log_loss(y_test, y_pred_test_prob)
-    test_acc = accuracy_score(y_test, y_pred_test_bin)
-
-    print("\nTest Results:")
-    print(f"  AUC:        {test_auc:.4f}")
-    print(f"  LogLoss:    {test_logloss:.4f}")
-    print(f"  Accuracy@0.5: {test_acc:.4f}")
-
+def feature_importance(model, X_train, top_n=20):
     imp = pd.Series(model.feature_importances_, index=X_train.columns).sort_values(ascending=False)
-    print("\nTop 20 feature importances:")
-    print(imp.head(20))
+    print(f"\nTop {top_n} feature importances:")
+    print(imp.head(top_n))
+    return imp
 
-    prec, rec, thr = precision_recall_curve(y_valid, y_pred_valid_prob)
+# Get best threshold settings for accuracy
+def tune_threshold(y_valid, y_prob_valid):
+    prec, rec, thr = precision_recall_curve(y_valid, y_prob_valid)
     f1 = (2 * prec * rec) / (prec + rec + 1e-12)
     best_idx = int(np.nanargmax(f1))
     best_thr = thr[best_idx] if best_idx < len(thr) else 0.5
     best_f1 = float(f1[best_idx])
     print(f"\nBest F1 threshold on valid: {best_thr:.3f}, F1={best_f1:.4f}")
+    return best_thr
 
-    y_test_bin_tuned = (y_pred_test_prob >= best_thr).astype(int)
-    test_acc_tuned = accuracy_score(y_test, y_test_bin_tuned)
-    tn, fp, fn, tp = confusion_matrix(y_test, y_test_bin_tuned).ravel()
+
+def main():
+    X_train, X_valid, X_test, y_train, y_valid, y_test = load_XY()
+
+    print("Shapes:")
+    print(f"  X_train: {X_train.shape}, y_train: {y_train.shape}")
+    print(f"  X_valid: {X_valid.shape}, y_valid: {y_valid.shape}")
+    print(f"  X_test : {X_test.shape},  y_test : {y_test.shape}")
+
+    model = train_model(X_train, y_train)
+
+    y_pred_valid, y_prob_valid = evaluate_model(model, X_valid, y_valid)
+
+    # Feature importances
+    feature_importance(model, X_train)
+
+    # Tune threshold using validation
+    best_thr = tune_threshold(y_valid, y_prob_valid)
+
+    print("\n--- Test Results @0.5 threshold ---")
+    y_pred_test, y_prob_test = evaluate_model(model, X_test, y_test, threshold=0.5)
+
+    # Evaluate on test set with tuned threshold
+    y_pred_test_tuned = (y_prob_test >= best_thr).astype(int)
+    test_acc_tuned = accuracy_score(y_test, y_pred_test_tuned)
+    tn, fp, fn, tp = confusion_matrix(y_test, y_pred_test_tuned).ravel()
     print(f"Test Accuracy (tuned threshold): {test_acc_tuned:.4f}")
     print(f"Confusion Matrix @tuned threshold: TN={tn} FP={fp} FN={fn} TP={tp}")
 
