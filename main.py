@@ -13,7 +13,7 @@ def load_model(name):
     
 models = {
     "da_rf": load_model("model_depression_anxiety_rf.pkl"),
-    # "da_xg": load_model("model_depression_anxiety_xg.pkl"),
+    "da_xg": load_model("model_depression_anxiety_xg.pkl"),
     "sd_rf": load_model("model_student_depression_rf.pkl"),
     "sd_xg": load_model("model_student_depression_xg.pkl")
 }
