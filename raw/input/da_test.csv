@@ -1,0 +1,6 @@
+school_year,bmi,who_bmi,phq_score,depression_severity,depressiveness,suicidal,depression_diagnosis,depression_treatment,gad_score,anxiety_severity,anxiousness,anxiety_diagnosis,anxiety_treatment,epworth_score,sleepiness,
+1,1,33.33333333,Class I Obesity,11,Mild,TRUE,FALSE,FALSE,FALSE,11,Moderate,TRUE,FALSE,FALSE,7,FALSE
+0,1,19.84126984,Normal,8,Mild,FALSE,FALSE,FALSE,FALSE,5,Mild,FALSE,FALSE,FALSE,14,TRUE
+0,1,25.10239133,Overweight,8,Mild,FALSE,FALSE,FALSE,FALSE,6,Mild,FALSE,FALSE,FALSE,6,FALSE
+1,2,23.73866213,Normal,19,Moderately severe,TRUE,TRUE,FALSE,FALSE,15,Severe,TRUE,FALSE,FALSE,11,TRUE
+0,3,25.61728395,Overweight,6,Mild,FALSE,FALSE,FALSE,FALSE,14,Moderate,TRUE,FALSE,FALSE,3,FALSE

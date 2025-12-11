@@ -1,6 +1,7 @@
 from pathlib import Path
 import numpy as np
 import pandas as pd
+import joblib
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import (
     accuracy_score,
@@ -14,7 +15,7 @@ PROJECT_ROOT = BASE_DIR.parent
 TARGET_COL = "depression_diagnosis"
 TRAIN_PATH = PROJECT_ROOT/"pre_processed"/"depression_anxiety_train.csv"
 TEST_PATH = PROJECT_ROOT/"pre_processed"/"depression_anxiety_test.csv"
-
+MODEL_PATH = "models_saved/model_depression_anxiety_rf.pkl"
 
 # Load the training & testing data
 def load_XY(train_path: str = TRAIN_PATH, test_path: str = TEST_PATH, target_col: str = TARGET_COL):
@@ -65,6 +66,11 @@ def train_model(X_train, y_train):
 
     print("\nTraining Random Forest model...")
     model.fit(X_train, y_train)
+
+    # Save model
+    joblib.dump(model, MODEL_PATH)
+    print(f"Model saved to {MODEL_PATH}")
+
     return model
 
 # Model accuracy
@@ -93,6 +99,17 @@ def tune_threshold(y_valid, y_prob_valid):
     print(f"\nBest F1 threshold on valid: {best_thr:.3f}, F1={best_f1:.4f}")
     return best_thr
 
+def predict_with_confidence(model, X):
+    # Get predicted classification
+    predictions = model.predict(X)
+    
+    # Get predicted probabilities
+    proba = model.predict_proba(X)
+    
+    # Confidence score
+    confidences = [proba[i, pred] for i, pred in enumerate(predictions)]
+    
+    return predictions, confidences
 
 def main():
     X_train, X_valid, X_test, y_train, y_valid, y_test = load_XY()

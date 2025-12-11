@@ -1,6 +1,7 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
+import joblib
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import (
     classification_report,
@@ -9,6 +10,8 @@ from sklearn.metrics import (
     ConfusionMatrixDisplay
 )
 import xgboost as xgb
+
+MODEL_PATH = "models_saved/model_student_depression_xg.pkl"
 
 def train_model(data_path="../pre_processed/processed_student_depression.csv"):
     # Load data
@@ -20,6 +23,7 @@ def train_model(data_path="../pre_processed/processed_student_depression.csv"):
         X, y, test_size=0.2, random_state=42, stratify=y
     )
 
+    # Actual model
     model = xgb.XGBClassifier(
         n_estimators=300,
         learning_rate=0.1,
@@ -32,6 +36,10 @@ def train_model(data_path="../pre_processed/processed_student_depression.csv"):
 
     print("Training XGBoost model...")
     model.fit(X_train, y_train)
+
+    # Save model
+    joblib.dump(model, MODEL_PATH)
+    print(f"Model saved to {MODEL_PATH}")
 
     return model, X_test, y_test
 
@@ -56,6 +64,19 @@ def plot_feature_correlation(X):
     sns.heatmap(corr, cmap="viridis", annot=False)
     plt.title("Feature Correlation Matrix")
     plt.show()
+
+def predict_with_confidence(model, X, threshold=0.5):
+    # Get predicted probabilities
+    y_prob = model.predict_proba(X)[:, 1]
+
+    # Get predicted classification
+    predictions = (y_prob >= threshold).astype(int)
+
+    # Confidence
+    confidences = y_prob * predictions + (1 - y_prob) * (1 - predictions)
+
+    return predictions, confidences
+
 
 def main():
     model, X_test, y_test = train_model()
