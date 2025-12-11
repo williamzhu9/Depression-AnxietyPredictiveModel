@@ -2,6 +2,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 import xgboost as xgb
+import joblib
 from sklearn.metrics import (
     accuracy_score,
     precision_recall_curve,
@@ -14,6 +15,7 @@ PROJECT_ROOT = BASE_DIR.parent
 TARGET_COL = "depression_diagnosis"
 TRAIN_PATH = PROJECT_ROOT / "pre_processed" / "depression_anxiety_train.csv"
 TEST_PATH = PROJECT_ROOT / "pre_processed" / "depression_anxiety_test.csv"
+MODEL_PATH = "models_saved/model_depression_anxiety_xg.pkl"
 
 # Load training & testing data
 def load_XY(train_path: str = TRAIN_PATH, test_path: str = TEST_PATH, target_col: str = TARGET_COL):
@@ -87,6 +89,10 @@ def train_model(X_train, y_train, X_valid, y_valid):
         evals_result=evals_result,
     )
 
+    # Save model
+    joblib.dump(model, MODEL_PATH)
+    print(f"Model saved to {MODEL_PATH}")
+
     return model
 
 # Model accuracy
@@ -119,6 +125,17 @@ def tune_threshold(y_valid, y_prob_valid):
     print(f"\nBest F1 threshold on valid: {best_thr:.3f}, F1={best_f1:.4f}")
     return best_thr
 
+def predict_with_confidence(model, X, threshold=0.5):
+    # Get predicted probabilities
+    y_prob = model.predict_proba(X)[:, 1]
+
+    # Get predicted classification
+    predictions = (y_prob >= threshold).astype(int)
+
+    # Confidence
+    confidences = y_prob * predictions + (1 - y_prob) * (1 - predictions)
+
+    return predictions, confidences
 
 def main():
     X_train, X_valid, X_test, y_train, y_valid, y_test = load_XY()

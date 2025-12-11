@@ -1,49 +1,52 @@
 import pandas as pd
-
-df = pd.read_csv("../raw/student_depression_dataset.csv")
+import os
 
 health_multiclass = {
-    "Unhealthy": 0,
-    "Moderate": 1,
+    "Unhealthy": 0, 
+    "Moderate": 1, 
     "Healthy": 2
 }
 
 sleep_multiclass = {
-    "Less than 5 hours": 0,
-    "5-6 hours": 1,
-    "7-8 hours": 2,
+    "Less than 5 hours": 0, 
+    "5-6 hours": 1, 
+    "7-8 hours": 2, 
     "More than 8 hours": 3
 }
 
 boolean_map = {
-    "Yes": 1,
-    "No": 0,
+    "Yes": 1, 
+    "No": 0
 }
 
 gender_map = {
-    "Male": 1,
+    "Male": 1, 
     "Female": 0
+}
+
+profession_map = {
+    "student": 0, 
+    "unemployed": 0, 
+    "employed": 1
+}
+
+degree_multiclass = {
+    "high school": 0, 
+    "other": 0, 
+    "bachelor's": 1, 
+    "master's": 2, 
+    "phd": 3
 }
 
 def profession_simplification(x):
     if isinstance(x, str):
         x_lower = x.lower()
-        
-        # Student group
         if "student" in x_lower:
             return "student"
-        
-        # Unemployed group
         if "unemployed" in x_lower or "none" in x_lower or "other" in x_lower:
             return "unemployed"
-        
         return "employed"
-    
-profession_map = {
-    "student": 0,
-    "unemployed": 0,
-    "employed": 1
-}
+    return x
 
 def degree_map(x):
     if x == "Class 12":
@@ -57,41 +60,41 @@ def degree_map(x):
     else:
         return "other"
 
-# Treating 'other' as basic education
-degree_multiclass ={
-    "high school": 0,
-    "other": 0,
-    "bachelor's": 1,
-    "master's": 2,
-    "phd": 3,
-}
+def preprocess_student_depression(df: pd.DataFrame) -> pd.DataFrame:
+    # Drop missing or useless data
+    df.columns = df.columns.str.lower()
 
-# Drop all missing data rows
-df.dropna(inplace=True)
-# Treating 'other' as missing data to reduce noise for sleep duration
-df = df[~df['Sleep Duration'].isin(['Others'])]
-# Dropping id and city to reduce noise and prevent overfitting (we don't care about id and we don't want city to influence classification due to lack of city data)
-df.drop(['id', "City"], axis=1,inplace=True)
+    if 'sleep duration' in df.columns:
+        df = df[~df['sleep duration'].isin(['Others'])]
+    drop_cols = [col for col in ['id', 'city'] if col in df.columns]
+    df = df.drop(columns=drop_cols)
+    
+    df["dietary habits"] = df["dietary habits"].map(health_multiclass)
+    df["sleep duration"] = df["sleep duration"].map(sleep_multiclass)
+    df["family history of mental illness"] = df["family history of mental illness"].map(boolean_map)
+    df["have you ever had suicidal thoughts ?"] = df["have you ever had suicidal thoughts ?"].map(boolean_map)
+    df["degree"] = df["degree"].apply(degree_map).map(degree_multiclass)
+    df["gender"] = df["gender"].map(gender_map)
+    df["profession"] = df["profession"].apply(profession_simplification).map(profession_map)
+    
+    # Rename columns
+    df.rename(columns={"profession": "employment", "degree": "education level"}, inplace=True)
+    
+    # Group booleans at the end
+    last_cols = ["employment", "have you ever had suicidal thoughts ?", "family history of mental illness"]
+    other_cols = [col for col in df.columns if col not in last_cols]
+    df = df[other_cols + last_cols]
 
-# Map all columns to proper encoding
-df["Dietary Habits"] = df["Dietary Habits"].map(health_multiclass)
-df["Sleep Duration"] = df["Sleep Duration"].map(sleep_multiclass)
-df["Family History of Mental Illness"] = df["Family History of Mental Illness"].map(boolean_map)
-df["Have you ever had suicidal thoughts ?"] = df["Have you ever had suicidal thoughts ?"].map(boolean_map)
-df["Degree"] = df["Degree"].apply(degree_map).map(degree_multiclass)
-df["Gender"] = df["Gender"].map(gender_map)
-df["Profession"] = df["Profession"].apply(profession_simplification).map(profession_map)
+    return df
 
-# Rename degree to education level
-df.rename(columns={"Profession": "Employment", "Degree": "Education Level"},inplace=True)
-df.columns = df.columns.str.lower()
-
-# Reorder columns so that T/F are together and Numerics are together
-last_cols = ["employment", "have you ever had suicidal thoughts ?", "family history of mental illness", "depression"]
-other_cols = [col for col in df.columns if col not in last_cols]
-new_order = other_cols + last_cols
-df = df[new_order]
-
-# Write processed data to csv
-df.to_csv("../pre_processed/processed_student_depression.csv",index=False)
-print("Write successful to pre_processed/processed_student_depression.csv")
+if __name__ == "__main__":
+    raw_path = "../raw/training/student_depression_dataset.csv"
+    processed_path = "../pre_processed/processed_student_depression.csv"
+    
+    if not os.path.exists(os.path.dirname(processed_path)):
+        os.makedirs(os.path.dirname(processed_path))
+    
+    df_raw = pd.read_csv(raw_path)
+    df_processed = preprocess_student_depression(df_raw)
+    df_processed.to_csv(processed_path, index=False)
+    print(f"Write successful to {processed_path}")
