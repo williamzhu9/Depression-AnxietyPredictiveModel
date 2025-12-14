@@ -1,4 +1,4 @@
-# Depression-AnxietyPredictiveModel
+# Depression-Predictive-Ensemble
 This project features an ensemble of machine learning models with the intent of early detection of depression or risk of depression in people. Specifically, this project trains random forest and XGBoost models on existing patient datasets to classify new patients as depressed or not depressed. We use a feature-partitioned ensemble, which splits some input I of patients with all features, into various subsets of features designated for each model. For example: model a is trained on feature subset A, model b is trained on feature subset B, while the input I is the union of subsets A and B. The outputted predictions from each of the models are then evaluated using a weighted voting system to determine if a patient in the overall input I should be classified as depressed or not. This project functions as a proof-of-concept of a much larger idea of automated early detection/alerting of mental illnesses. While the project might feature some design and realism limitations, conceptually it provides a good foundation for further research to expand upon. 
 
 # Technologies Used
