@@ -1,4 +1,4 @@
-# Depression-AnxietyPredictiveModel
+# Depression-Predictive-Ensemble
 This project features an ensemble of machine learning models with the intent of early detection of depression or risk of depression in people. Specifically, this project trains random forest and XGBoost models on existing patient datasets to classify new patients as depressed or not depressed. We use a feature-partitioned ensemble, which splits some input I of patients with all features, into various subsets of features designated for each model. For example: model a is trained on feature subset A, model b is trained on feature subset B, while the input I is the union of subsets A and B. The outputted predictions from each of the models are then evaluated using a weighted voting system to determine if a patient in the overall input I should be classified as depressed or not. This project functions as a proof-of-concept of a much larger idea of automated early detection/alerting of mental illnesses. While the project might feature some design and realism limitations, conceptually it provides a good foundation for further research to expand upon. 
 
 # Technologies Used
@@ -6,14 +6,20 @@ To develop this project, we based it in python using Pandas as the backbone of o
 
 # Directory Tree
 ```
-project-root/
+Depression-Predictive-Ensemble/
 │
 ├── main.py
 ├── README.md
 │
 ├── raw/
 │   └── input/
+│       └── da_test.csv
 │       └── input.csv
+│       └── student_test.csv
+│   └── training/
+│       └── anxiety_depression_dataset.csv
+│       └── depression_anxiety_dataset.csv
+│       └── student_depression_dataset.csv
 │
 ├── output/
 │   └── ensemble_final_predictions.csv
@@ -24,9 +30,16 @@ project-root/
 │       ├── model_depression_anxiety_xg.pkl
 │       ├── model_student_depression_rf.pkl
 │       └── model_student_depression_xg.pkl
+│   └── anxiety_depression_rf_model.py
+│   └── depression_anxiety_rf_model.py
+│   └── depression_anxiety_xg_model.py
+│   └── student_depression_rf_model.py
+│   └── student_depression_xg_model.py
 │
 ├── scripts/
-│   ├── __init__.py
+│   ├── sklearn-env/
+│   ├── .gitattributes
+│   └── anxiety_depression_processor.py
 │   ├── depression_anxiety_processor.py
 │   └── student_depression_processor.py
 │
