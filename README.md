@@ -6,14 +6,20 @@ To develop this project, we based it in python using Pandas as the backbone of o
 
 # Directory Tree
 ```
-project-root/
+Depression-Predictive-Ensemble/
 │
 ├── main.py
 ├── README.md
 │
 ├── raw/
 │   └── input/
+│       └── da_test.csv
 │       └── input.csv
+│       └── student_test.csv
+│   └── training/
+│       └── anxiety_depression_dataset.csv
+│       └── depression_anxiety_dataset.csv
+│       └── student_depression_dataset.csv
 │
 ├── output/
 │   └── ensemble_final_predictions.csv
@@ -24,9 +30,16 @@ project-root/
 │       ├── model_depression_anxiety_xg.pkl
 │       ├── model_student_depression_rf.pkl
 │       └── model_student_depression_xg.pkl
+│   └── anxiety_depression_rf_model.py
+│   └── depression_anxiety_rf_model.py
+│   └── depression_anxiety_xg_model.py
+│   └── student_depression_rf_model.py
+│   └── student_depression_xg_model.py
 │
 ├── scripts/
-│   ├── __init__.py
+│   ├── sklearn-env/
+│   ├── .gitattributes
+│   └── anxiety_depression_processor.py
 │   ├── depression_anxiety_processor.py
 │   └── student_depression_processor.py
 │
