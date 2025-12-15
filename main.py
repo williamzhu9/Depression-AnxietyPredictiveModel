@@ -5,6 +5,10 @@ import joblib
 import os
 from scripts.student_depression_processor import preprocess_student_depression
 from scripts.depression_anxiety_processor import preprocess_depression_anxiety
+import matplotlib.pyplot as plt
+import seaborn as sns
+from sklearn.metrics import f1_score
+
 
 MODEL_DIR = "models/models_saved"
 
@@ -37,7 +41,6 @@ feature_groups = [
         "bmi",
         "who_bmi",
         "phq_scores",
-        "depression_severity",
         "gad_score",
         "anxiety_severity",
         "epworth_score",
@@ -190,4 +193,33 @@ final_df["final_confidence_percent"] = final_confidence * 100
 final_df.to_csv("output/ensemble_final_predictions.csv", index=False)
 
 print("Weighted voting predictions:")
-print(final_df.head())
+print(final_df)
+
+# Correlation matrix of model predictions + ensemble
+model_pred_df = pd.DataFrame({name: df['pred_class'] for name, df in ensemble_preds.items()})
+model_pred_df['ensemble_final'] = final_preds
+sns.heatmap(model_pred_df.corr(), annot=True, fmt=".2f", cmap="coolwarm")
+plt.title("Correlation Matrix of Model Predictions and Ensemble")
+plt.show()
+
+# F1 score
+y_true = input_df['depressiveness'].values
+print(f"Ensemble F1 Score: {f1_score(y_true, final_preds):.4f}")
+
+# Weighted feature importance
+fi_df = pd.DataFrame({
+    f: sum(model.feature_importances_[i] * MODEL_WEIGHTS.get(name,1.0)
+           for name, model in models.items() if hasattr(model,'feature_importances_')
+           for i, col in enumerate(model_to_data[name].columns) if col==f)
+    for f in set(col for df in model_to_data.values() for col in df.columns)
+}, index=['importance']).T.sort_values('importance', ascending=False)
+
+print("Top features considered by the ensemble:")
+print(fi_df.head(20))
+
+plt.barh(fi_df.head(20).index, fi_df.head(20)['importance'], color='skyblue')
+plt.gca().invert_yaxis()
+plt.xlabel("Weighted Feature Importance")
+plt.title("Top Features in the Ensemble")
+plt.tight_layout()
+plt.show()

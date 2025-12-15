@@ -1,6 +1,9 @@
 Gender,Age,Profession,Academic Pressure,Work Pressure,CGPA,Study Satisfaction,Job Satisfaction,Sleep Duration,Dietary Habits,Degree,Have you ever had suicidal thoughts ?,Work/Study Hours,Financial Stress,Family History of Mental Illness,Depression,school_year,bmi,who_bmi,phq_score,depression_severity,depressiveness,suicidal,depression_diagnosis,depression_treatment,gad_score,anxiety_severity,anxiousness,anxiety_diagnosis,anxiety_treatment,epworth_score,sleepiness
-Male,18,Student,4,0,8.13,2,0,5-6 hours,Moderate,Class 12,Yes,5,2,Yes,1,1,37,Class II Obesity,13,Mild,TRUE,FALSE,FALSE,FALSE,15,Moderately severe,TRUE,FALSE,FALSE,14,TRUE
+Male,18,Student,4,0,8.13,2,0,5-6 hours,Moderate,Class 12,Yes,5,2,Yes,1,1,37,Class II Obesity,13,Severe,TRUE,FALSE,FALSE,FALSE,15,Moderately severe,TRUE,FALSE,FALSE,14,TRUE
 Female,21,Student,2,0,5.9,3,0,More than 8 hours,Moderate,B.Com,No,1,1,No,0,1,17,Underweight,8,Mild,FALSE,FALSE,FALSE,FALSE,5,Mild,FALSE,FALSE,FALSE,9,FALSE
-Male,22,Civil Engineer,5,0,8.97,1,0,Less than 5 hours,Unhealthy,BA,No,9,5,No,1,1,28.3,Overweight,15,Mild,TRUE,TRUE,FALSE,FALSE,17,Moderate,FALSE,FALSE,FALSE,15,TRUE
-Male,20,Student,1,0,5.59,2,0,7-8 hours,Unhealthy,BCA,Yes,4,3,No,0,1,23.73866213,Normal,6,Mild,FALSE,FALSE,FALSE,FALSE,15,Mild,FALSE,FALSE,FALSE,11,TRUE
+Male,22,Civil Engineer,5,0,8.97,1,0,Less than 5 hours,Unhealthy,BA,No,9,5,No,1,1,28.3,Overweight,15,Severe,TRUE,TRUE,FALSE,FALSE,17,Moderate,FALSE,FALSE,FALSE,15,TRUE
+Male,20,Student,1,0,5.59,2,0,7-8 hours,Unhealthy,BCA,Yes,4,3,No,0,1,23.73866213,Normal,6,Moderate,FALSE,FALSE,FALSE,FALSE,15,Mild,FALSE,FALSE,FALSE,11,TRUE
 Female,25,Student,4,0,7.39,3,0,7-8 hours,Healthy,MBBS,Yes,3,2,No,0,1,21,Normal,6,Mild,FALSE,FALSE,FALSE,FALSE,14,Moderate,TRUE,FALSE,FALSE,3,FALSE
+Female,28,Marketing,2,2,8.3,4,5,More than 8 hours,Moderate,B.Com,No,8,2,No,0,4,20,Normal,7,Mild,FALSE,FALSE,FALSE,FALSE,10,Moderate,FALSE,FALSE,FALSE,8,FALSE
+Male,23,Finance,3,4,10.11,5,4,5-6 hours,Moderate,B.Fin,Yes,10,1,No,1,4,23,Normal,9,Severe,TRUE,TRUE,FALSE,FALSE,15,Mild,FALSE,FALSE,FALSE,15,TRUE
+Female,19,Student,4,0,9.45,2,0,5-6 hours,Unhealthy,B.Eng,No,6,2,Yes,1,2,18,Underweight,10,Moderate,TRUE,FALSE,FALSE,FALSE,13,Severe,TRUE,TRUE,FALSE,13,TRUE
